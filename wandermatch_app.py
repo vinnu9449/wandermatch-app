@@ -1,41 +1,37 @@
 import streamlit as st
-import pandas as pd
-from PIL import Image
 
-# Page settings
-st.set_page_config(page_title="WanderMatch", page_icon="🌍", layout="centered")
+# App Title and Image
+st.set_page_config(page_title="WanderMatch", layout="centered")
+st.title("🌍 WanderMatch: Your Personal Travel Buddy")
 
-# Load image
-image = Image.open("travel_banner.png")
-st.image(image, use_column_width=True)
+# Show app banner image from GitHub
+st.image("https://github.com/vinnu9449/wandermatch-app/raw/main/download.jpg", caption="WanderMatch Travel App")
 
-# Title and description
-st.title("🌍 WanderMatch: Find Your Travel Soulmate")
-st.markdown("Welcome to **WanderMatch**, the fun way to match your travel style with a perfect destination!")
+# Description
+st.markdown("""
+WanderMatch is a travel planning app designed to match users with the perfect destination based on their mood, budget, and preferences. 
+Discover hidden gems, plan within your budget, and travel smart!
+""")
 
-# Load destination data
-df = pd.read_csv("wander_data.csv")
+# Input Section
+st.header("✨ Tell us about your travel plans")
 
-# User preferences
-st.sidebar.header("🎯 Choose your preferences")
-climate = st.sidebar.selectbox("Preferred Climate", df['Climate'].unique())
-budget = st.sidebar.slider("Budget (USD)", 200, 3000, 1500)
-interest = st.sidebar.selectbox("Your Interest", df['Interest'].unique())
+budget = st.selectbox("Select your budget range", ["Low", "Medium", "High"])
+destination_type = st.multiselect("What kind of destination do you prefer?", ["Beaches", "Mountains", "Cities", "Nature", "Historical"])
+mood = st.radio("What’s your current travel mood?", ["Relaxing", "Adventurous", "Romantic", "Cultural", "Fun with Friends"])
 
-# Filter destinations
-filtered_df = df[(df['Climate'] == climate) & 
-                 (df['Cost'] <= budget) & 
-                 (df['Interest'] == interest)]
+# Matching Logic (placeholder)
+if st.button("🔍 Find My Destination"):
+    if budget == "Low":
+        st.success("🌴 We recommend: **Hampi, India** – A low-budget historical adventure!")
+    elif budget == "Medium":
+        st.success("🏞️ We recommend: **Manali, India** – Breathtaking mountains and snow!")
+    elif budget == "High":
+        st.success("🌊 We recommend: **Maldives** – Luxurious beachside getaway!")
+    else:
+        st.warning("Please choose a budget to get suggestions.")
 
-# Show results
-if not filtered_df.empty:
-    st.success(f"✨ We found {len(filtered_df)} destination(s) for you!")
-    for _, row in filtered_df.iterrows():
-        st.subheader(row['Destination'])
-        st.markdown(f"**Country:** {row['Country']}  \n"
-                    f"**Climate:** {row['Climate']}  \n"
-                    f"**Estimated Cost:** ${row['Cost']}  \n"
-                    f"**Interest:** {row['Interest']}")
-        st.markdown("---")
-else:
-    st.warning("Oops! No destinations match your choices. Try changing your filters.")
+# Footer
+st.markdown("---")
+st.markdown("Made with ❤️ by [vin](https://github.com/vinnu9449)")
+
