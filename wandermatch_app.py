@@ -1,44 +1,41 @@
 import streamlit as st
 import pandas as pd
 from PIL import Image
-import os
 
-# App Title
-st.set_page_config(page_title="Travel Recommendation App", layout="wide")
-st.title("🌍 Find Your Perfect Travel Destination!")
-st.markdown("Discover destinations based on your **mood** and **budget** ✨")
+# Page settings
+st.set_page_config(page_title="WanderMatch", page_icon="🌍", layout="centered")
 
-# Load data
-df = pd.read_csv("places.csv")
+# Load image
+image = Image.open("travel_banner.png")
+st.image(image, use_column_width=True)
 
-# Sidebar filters
-st.sidebar.header("Filter Options 🎯")
-selected_mood = st.sidebar.selectbox("Choose your mood", df["Mood"].unique())
-selected_budget = st.sidebar.selectbox("Choose your budget", df["Budget"].unique())
+# Title and description
+st.title("🌍 WanderMatch: Find Your Travel Soulmate")
+st.markdown("Welcome to **WanderMatch**, the fun way to match your travel style with a perfect destination!")
 
-# Filter DataFrame
-filtered_df = df[
-    (df["Mood"].str.lower() == selected_mood.lower()) &
-    (df["Budget"].str.lower() == selected_budget.lower())
-]
+# Load destination data
+df = pd.read_csv("wander_data.csv")
 
-# Display Results
+# User preferences
+st.sidebar.header("🎯 Choose your preferences")
+climate = st.sidebar.selectbox("Preferred Climate", df['Climate'].unique())
+budget = st.sidebar.slider("Budget (USD)", 200, 3000, 1500)
+interest = st.sidebar.selectbox("Your Interest", df['Interest'].unique())
+
+# Filter destinations
+filtered_df = df[(df['Climate'] == climate) & 
+                 (df['Cost'] <= budget) & 
+                 (df['Interest'] == interest)]
+
+# Show results
 if not filtered_df.empty:
-    st.subheader(f"Results for mood **{selected_mood}** and budget **{selected_budget}**")
-    for index, row in filtered_df.iterrows():
-        col1, col2 = st.columns([1, 2])
-        
-        with col1:
-            img_path = os.path.join("images", row["Image"])
-            if os.path.exists(img_path):
-                st.image(img_path, caption=row["Place"], use_container_width=True)
-            else:
-                st.warning("Image not found.")
-        
-        with col2:
-            st.markdown(f"### 📍 {row['Place']}")
-            st.markdown(f"💬 {row['Description']}")
-            st.markdown(f"🧳 Budget: **{row['Budget']}** | 🌈 Mood: **{row['Mood']}**")
-            st.markdown("---")
+    st.success(f"✨ We found {len(filtered_df)} destination(s) for you!")
+    for _, row in filtered_df.iterrows():
+        st.subheader(row['Destination'])
+        st.markdown(f"**Country:** {row['Country']}  \n"
+                    f"**Climate:** {row['Climate']}  \n"
+                    f"**Estimated Cost:** ${row['Cost']}  \n"
+                    f"**Interest:** {row['Interest']}")
+        st.markdown("---")
 else:
-    st.error("❌ No destinations found. Try changing your mood or budget.")
+    st.warning("Oops! No destinations match your choices. Try changing your filters.")
