@@ -1,45 +1,52 @@
 import streamlit as st
-import pandas as pd
-import random
-from PIL import Image
 
-# Set page config
-st.set_page_config(page_title="WanderMatch - Plan Your Dream Trip", layout="centered")
+# App setup
+st.set_page_config(page_title="WanderMatch", layout="centered")
+st.title("🌍 WanderMatch: Your Personal Travel Buddy")
+st.image("https://github.com/vinnu9449/wandermatch-app/raw/main/download.jpg", caption="WanderMatch Travel App")
 
-# Custom header
-st.markdown("<h1 style='text-align: center; color: #0099ff;'>🌍 WanderMatch: Your Travel Buddy</h1>", unsafe_allow_html=True)
+# Intro
+st.markdown("""
+WanderMatch is a travel planning app that suggests perfect destinations based on your **budget**, **mood**, and **travel interests**. 🌏
+""")
 
-# Load dataset
-df = pd.read_csv("places.csv")
+# User Inputs
+st.header("✨ Tell us about your travel plans")
 
-# Sidebar inputs
-st.sidebar.header("✨ Personalize Your Trip")
-budget = st.sidebar.selectbox("Select your budget level:", ["Low", "Medium", "High"])
-interest = st.sidebar.multiselect("What do you enjoy?", ["Beach", "Mountains", "City", "Heritage", "Wildlife"])
+budget = st.selectbox("💰 Select your budget range", ["Low", "Medium", "High"])
+destination_type = st.multiselect("📍 Preferred destination types", ["Beaches", "Mountains", "Cities", "Nature", "Historical"])
+mood = st.radio("🧠 What’s your travel mood?", ["Relaxing", "Adventurous", "Romantic", "Cultural", "Fun with Friends"])
 
-# Button to generate recommendations
-if st.sidebar.button("🎒 Show Me My Places!"):
-    st.subheader("🌟 Top Destination Matches for You:")
+# Travel suggestions database (very simple logic-based example)
+suggestions = {
+    "Low": {
+        "Relaxing": "🌿 Alleppey, Kerala – Houseboats, lagoons, and calm nature",
+        "Adventurous": "🏞️ Rishikesh – River rafting and thrill on a budget",
+        "Romantic": "🌸 Coorg – Misty hills and coffee plantations",
+        "Cultural": "🏯 Hampi – UNESCO site with rich heritage",
+        "Fun with Friends": "🚌 Goa (budget travel) – Beaches, forts, and nightlife"
+    },
+    "Medium": {
+        "Relaxing": "🍃 Ooty – Tea gardens, lakes and cool breeze",
+        "Adventurous": "🧗‍♂️ Manali – Trekking and snow adventure",
+        "Romantic": "💞 Udaipur – The city of lakes and royal vibes",
+        "Cultural": "🎭 Jaipur – Palaces, art, and Rajasthani culture",
+        "Fun with Friends": "🎢 Lonavala – Waterfalls, treks and fun resorts"
+    },
+    "High": {
+        "Relaxing": "🌊 Maldives – Private villas and turquoise waters",
+        "Adventurous": "🏔️ Leh-Ladakh – Biker’s dream and sky-high peaks",
+        "Romantic": "🏝️ Bora Bora – Blue lagoon paradise",
+        "Cultural": "🎨 Kyoto, Japan – Temples, traditions and tea",
+        "Fun with Friends": "🎉 Bali – Fun beaches, volcanoes and clubs"
+    }
+}
 
-    filtered_df = df[(df['budget'].str.lower() == budget.lower())]
-
-    if interest:
-        filtered_df = filtered_df[filtered_df['type'].isin(interest)]
-
-    if not filtered_df.empty:
-        top_recommendations = filtered_df.sample(n=min(3, len(filtered_df)))
-
-        for _, row in top_recommendations.iterrows():
-            st.markdown(f"### {row['name']}, {row['country']}")
-            st.markdown(f"**Type:** {row['type']}  |  **Budget:** {row['budget']}")
-            st.markdown(f"📍 {row['description']}")
-            st.image(row['image'], width=600)
-            st.markdown("---")
-    else:
-        st.warning("🙁 Sorry, we couldn’t find any destinations matching your preferences. Try adjusting your options!")
-
-else:
-    st.markdown("💡 Use the sidebar to get personalized travel suggestions!")
+# Show Result
+if st.button("🔍 Find My Destination"):
+    recommendation = suggestions[budget][mood]
+    st.success(f"✨ Based on your preferences, we recommend:\n\n{recommendation}")
 
 # Footer
-st.markdown("<br><hr><center>Made with ❤️ using Streamlit</center>", unsafe_allow_html=True)
+st.markdown("---")
+st.markdown("Made with ❤️ by [vin](https://github.com/vinnu9449)")
