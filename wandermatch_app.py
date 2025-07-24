@@ -1,47 +1,44 @@
-
 import streamlit as st
 import pandas as pd
+from PIL import Image
+import os
 
-st.set_page_config(page_title="WanderMatch", page_icon="🌍", layout="centered")
-st.title("🌴 WanderMatch: AI-Powered Vacation Recommender")
-st.markdown("Find your perfect destination based on your mood and budget 💖")
+# App Title
+st.set_page_config(page_title="Travel Recommendation App", layout="wide")
+st.title("🌍 Find Your Perfect Travel Destination!")
+st.markdown("Discover destinations based on your **mood** and **budget** ✨")
 
-# Dataset
-data = {
-    'Destination': ['Goa', 'Manali', 'Udaipur', 'Rishikesh', 'Pondicherry', 'Leh-Ladakh', 'Munnar', 'Andaman Islands', 'Coorg', 'Jaipur'],
-    'Mood': ['Chill', 'Adventure', 'Romantic', 'Spiritual', 'Chill', 'Adventure', 'Romantic', 'Chill', 'Romantic', 'Cultural'],
-    'Budget': ['Medium', 'Medium', 'Low', 'Low', 'Medium', 'High', 'Low', 'High', 'Low', 'Low'],
-    'Image_URL': [
-        'https://upload.wikimedia.org/wikipedia/commons/d/d1/Palolem_Beach%2C_Goa.jpg',
-        'https://upload.wikimedia.org/wikipedia/commons/d/db/Manali_City_View.jpg',
-        'https://upload.wikimedia.org/wikipedia/commons/d/d4/Lake_Pichola_Udaipur.jpg',
-        'https://upload.wikimedia.org/wikipedia/commons/3/33/Parmarth_Niketan_Ashram_Rishikesh.jpg',
-        'https://upload.wikimedia.org/wikipedia/commons/f/f1/Pondicherry_Beach.jpg',
-        'https://upload.wikimedia.org/wikipedia/commons/4/4f/Ladakh_-_Pangong_lake.jpg',
-        'https://upload.wikimedia.org/wikipedia/commons/e/e0/Munnar_hillstation_kerala.jpg',
-        'https://upload.wikimedia.org/wikipedia/commons/8/84/Andaman_Nicobar_Islands.jpg',
-        'https://upload.wikimedia.org/wikipedia/commons/f/f4/Coorg_scenery.jpg',
-        'https://upload.wikimedia.org/wikipedia/commons/4/4e/Amber_Fort%2C_Jaipur.jpg'
-    ]
-}
+# Load data
+df = pd.read_csv("places.csv")
 
-df = pd.DataFrame(data)
+# Sidebar filters
+st.sidebar.header("Filter Options 🎯")
+selected_mood = st.sidebar.selectbox("Choose your mood", df["Mood"].unique())
+selected_budget = st.sidebar.selectbox("Choose your budget", df["Budget"].unique())
 
-# Sidebar
-st.sidebar.header("Tell us about you 😄")
-selected_mood = st.sidebar.selectbox("What's your travel mood?", sorted(df['Mood'].unique()))
-selected_budget = st.sidebar.selectbox("What's your budget?", sorted(df['Budget'].unique()))
+# Filter DataFrame
+filtered_df = df[
+    (df["Mood"].str.lower() == selected_mood.lower()) &
+    (df["Budget"].str.lower() == selected_budget.lower())
+]
 
-# Filter
-filtered = df[(df['Mood'] == selected_mood) & (df['Budget'] == selected_budget)]
-
-# Display
-if not filtered.empty:
-    st.success(f"🎯 Found {len(filtered)} match(es) for you!")
-    for index, row in filtered.iterrows():
-        st.subheader(f"🌍 {row['Destination']}")
-        st.image(row['Image_URL'], use_column_width=True, caption=f"Perfect for a {row['Mood']} trip")
-        st.markdown(f"💰 Budget: **{row['Budget']}**")
-        st.markdown("---")
+# Display Results
+if not filtered_df.empty:
+    st.subheader(f"Results for mood **{selected_mood}** and budget **{selected_budget}**")
+    for index, row in filtered_df.iterrows():
+        col1, col2 = st.columns([1, 2])
+        
+        with col1:
+            img_path = os.path.join("images", row["Image"])
+            if os.path.exists(img_path):
+                st.image(img_path, caption=row["Place"], use_container_width=True)
+            else:
+                st.warning("Image not found.")
+        
+        with col2:
+            st.markdown(f"### 📍 {row['Place']}")
+            st.markdown(f"💬 {row['Description']}")
+            st.markdown(f"🧳 Budget: **{row['Budget']}** | 🌈 Mood: **{row['Mood']}**")
+            st.markdown("---")
 else:
-    st.warning("Oops! No match found. Try changing your mood or budget 💭")
+    st.error("❌ No destinations found. Try changing your mood or budget.")
